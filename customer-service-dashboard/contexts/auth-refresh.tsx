@@ -6,7 +6,7 @@ let refreshInterval: NodeJS.Timeout | null = null;
  * Start automatic silent refresh every X minutes.
  * @param intervalMinutes how often to refresh (e.g. 14 if access = 15 min)
  */
-export function startTokenAutoRefresh(intervalMinutes = 15) {
+export function startTokenAutoRefresh(intervalMinutes = 110) { // 2小时前10分钟刷新
   stopTokenAutoRefresh(); // ensure no duplicate timers
 
   console.log(`🔁 Starting auto-refresh every ${intervalMinutes} min...`);

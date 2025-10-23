@@ -16,6 +16,7 @@ import waSessionMonitorRoutes from './routes/wa-session-monitor';
 import debugClientsRoutes from './routes/debug-clients';
 import websocketDebugRoutes from './routes/websocket-debug';
 import { autoReconnectOnStartup } from './services/startup-reconnect.service';
+import { sessionCleanupService } from './services/session-cleanup.service';
 import authRoutes from './routes/auth';
 import planRoutes from './routes/plan';
 import userRoutes from './routes/user';
@@ -281,6 +282,11 @@ app.use((req, res, next) => {
     await initDb();
     await seedSuperAdmin();
     console.log("✅ DB init + seeding done");
+    
+    // Clean up orphaned sessions
+    console.log("🧹 Starting session cleanup...");
+    await sessionCleanupService.cleanupOrphanedSessions();
+    console.log("✅ Session cleanup completed");
     
     // Start health checks after database is initialized
     startHealthChecks();
