@@ -25,7 +25,7 @@ const envSchema = z.object({
   PG_USER: z.string().default('postgres'),
   PG_PASSWORD: z.string().default('1234'),
   PG_SCHEMA: z.string().default('CHATX'),
-  PG_URL: z.string().default('postgresql://postgres:IebpGJnADFFxslkpMHwfQYmgNYBWLjbj@metro.proxy.rlwy.net:21891/railway'),
+  PG_URL: z.string().default('postgresql://postgres:ZegouIsrKGNDiaIuchefSNrlwKpxTFfI@switchyard.proxy.rlwy.net:10903/railway'),
 });
 
 function loadEnv() {
