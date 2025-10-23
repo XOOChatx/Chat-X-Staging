@@ -42,8 +42,8 @@ export interface AuthTokenPayload {
 // ----------- Config -----------
 const ACCESS_TOKEN_SECRET = config.SESS_SECRET;
 const REFRESH_TOKEN_SECRET = config.REFRESH_SECRET || config.SESS_SECRET;
-const ACCESS_EXP = "15m";
-const REFRESH_EXP = "7d";
+const ACCESS_EXP = "2m";  // 延长到2小时
+const REFRESH_EXP = "30d"; // 延长到30天
 
 // =======================================================
 // ✅ Exported utility function to generate tokens
