@@ -26,11 +26,11 @@ export class AuthController {
         "authService"
       );
 
-      res.cookie("access_token", result.accessToken, getCookieOptions(2 * 60 * 60 * 1000)); // 2小时
+      res.cookie("access_token", result.accessToken, getCookieOptions(15 * 60 * 1000));
 
       // Example: cross-domain deployment
       //res.cookie("refresh_token", result.refreshToken, getCookieOptions(7 * 24 * 60 * 60 * 1000, { crossDomain: true, isRefresh: true }));
-      res.cookie("refresh_token", result.refreshToken, getCookieOptions(30 * 24 * 60 * 60 * 1000, { crossDomain: true, isRefresh: true })); // 30天
+      res.cookie("refresh_token", result.refreshToken, getCookieOptions(7 * 24 * 60 * 1000, { crossDomain: true, isRefresh: true }));
 
       return res.status(result.success ? 200 : 401).json(result);
     }catch (err: any) {
@@ -216,13 +216,13 @@ export class AuthController {
       };
   
       // Only generate new access token, keep same refresh token
-      const accessToken = jwt.sign(tokenPayload, ACCESS_TOKEN_SECRET, { expiresIn: "2h" });
+      const accessToken = jwt.sign(tokenPayload, ACCESS_TOKEN_SECRET, { expiresIn: "15m" });
   
       res.cookie("access_token", accessToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-        maxAge: 2 * 60 * 60 * 1000, // 2小时
+        maxAge: 15 * 60 * 1000, // 15 minutes
         path: "/", // must be same path as login cookie
       });
 
