@@ -1,0 +1,17 @@
+# Railway 忽略文件
+# 避免包含不必要的文件
+
+node_modules/
+.git/
+*.log
+.env
+.env.local
+.env.production
+.env.development
+dist/
+build/
+coverage/
+.nyc_output/
+.cache/
+.temp/
+.tmp/

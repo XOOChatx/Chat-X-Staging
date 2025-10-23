@@ -1,0 +1,25 @@
+[build]
+apt_packages = [
+  "chromium",
+  "libnss3", "libatk-bridge2.0-0", "libdrm2", "libxkbcommon0", "libxcomposite1",
+  "libxdamage1", "libxrandr2", "libgbm1", "libxss1", "libasound2", "fonts-liberation", "xdg-utils"
+]
+
+[phases.install]
+cmds = [
+  "cd server && npm ci --no-audit --no-fund"
+]
+
+[phases.build]
+cmds = [
+  "cd server && npm run build"
+]
+
+[deploy]
+startCommand = "cd server && node dist/app.js"
+
+[env]
+NODE_ENV = "production"
+PUPPETEER_SKIP_CHROMIUM_DOWNLOAD = "true"
+PUPPETEER_EXECUTABLE_PATH = "/usr/bin/chromium"
+CHROME_PATH = "/usr/bin/chromium"
