@@ -16,7 +16,7 @@ export function requireAdmin(req: AuthenticatedRequest, res: Response, next: Nex
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     // 确保无论失败/成功都返回CORS头，避免浏览器拦截
     const origin = req.headers.origin as string | undefined;
-    const allowedOrigins = ['https://www.evolution-x.io','https://evolution-x.io','https://frontend-production-56b7.up.railway.app'];
+    const allowedOrigins = ['https://www.staging.evolution-x.io','https://staging.evolution-x.io','https://frontend-staging-5ab3.up.railway.app'];
     if (origin && allowedOrigins.includes(origin)) {
       res.header('Access-Control-Allow-Origin', origin);
       res.header('Access-Control-Allow-Credentials', 'true');
@@ -35,7 +35,7 @@ export function requireAdmin(req: AuthenticatedRequest, res: Response, next: Nex
   
   if (token !== config.ADMIN_TOKEN) {
     const origin = req.headers.origin as string | undefined;
-    const allowedOrigins = ['https://www.evolution-x.io','https://evolution-x.io','https://frontend-production-56b7.up.railway.app'];
+    const allowedOrigins = ['https://www.staging.evolution-x.io','https://staging.evolution-x.io','https://frontend-staging-5ab3.up.railway.app'];
     if (origin && allowedOrigins.includes(origin)) {
       res.header('Access-Control-Allow-Origin', origin);
       res.header('Access-Control-Allow-Credentials', 'true');

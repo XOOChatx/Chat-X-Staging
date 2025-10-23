@@ -5,9 +5,9 @@ import { CorsOptions } from 'cors';
  * Add all domains where your frontend or admin dashboard may run.
  */
 export const ALLOWED_ORIGINS = [
-  'https://frontend-production-56b7.up.railway.app',
-  'https://www.evolution-x.io',
-  'https://evolution-x.io', // 🔥 Added without www subdomain
+  'frontend-staging-5ab3.up.railway.app',
+  'https://www.staging.evolution-x.io',
+  'https://staging.evolution-x.io', // 🔥 Added without www subdomain
   'http://localhost:3000',
   'https://localhost:3000',
   'http://localhost:3001',

@@ -9,7 +9,7 @@ const envSchema = z.object({
   REFRESH_SECRET: z.string().default('refresh-token-secret-change-in-production'),
   DATABASE_PATH: z.string().default('./data/sessions.db'),
   AUDIT_LOG_PATH: z.string().default('./data/audit.log'),
-  CORS_ORIGIN: z.string().default('https://staging.evolution-x.io/'),
+  CORS_ORIGIN: z.string().default('https://staging.evolution-x.io'),
   API_BASE_URL: z.string().default('https://chat-x-staging.up.railway.app'),
   // WhatsApp
   WA_DATA_ROOT: z.string().default('./.wa-sessions'),
@@ -25,7 +25,7 @@ const envSchema = z.object({
   PG_USER: z.string().default('postgres'),
   PG_PASSWORD: z.string().default('1234'),
   PG_SCHEMA: z.string().default('CHATX'),
-  PG_URL: z.string().default('postgresql://postgres:ZegouIsrKGNDiaIuchefSNrlwKpxTFfI@switchyard.proxy.rlwy.net:10903/railway'),
+  PG_URL: z.string().default('postgresql://postgres:IebpGJnADFFxslkpMHwfQYmgNYBWLjbj@metro.proxy.rlwy.net:21891/railway'),
 });
 
 function loadEnv() {
