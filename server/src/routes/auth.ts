@@ -3,6 +3,7 @@ import { Router } from "express";
 import { AuthController } from "../controller/auth.controller";
 import { requireAuth } from "../middleware/requireAuth";
 import { requirePermission } from "../middleware/requirePerm";
+import { getCookieOptions } from "@/utils/cookieOptions";
 //import { requirePermission } from "../middleware/requirePerm";
 
 const router = Router();
@@ -13,18 +14,22 @@ router.get("/me", requireAuth, (req, res) => ctrl.me(req, res))
 //router.post("/change-password", requireAuth, (req, res) => ctrl.changePassword(req, res));
 router.post("/logout", (req, res) => {
     // Clear cookies by setting Max-Age=0
-    res.clearCookie("access_token", {
-      httpOnly: true,
-      secure: true, // or false in local dev (localhost)
-      sameSite: "lax",
-      path: "/",
-    });
-    res.clearCookie("refresh_token", {
-      httpOnly: true,
-      secure: true,
-      sameSite: "lax",
-      path: "/",
-    });
+    res.clearCookie("access_token", getCookieOptions(0, { isRefresh: false }));
+    res.clearCookie("refresh_token", getCookieOptions(0, { isRefresh: true }));
+
+
+    // res.clearCookie("access_token", {
+    //   httpOnly: true,
+    //   secure: true, // or false in local dev (localhost)
+    //   sameSite: "lax",
+    //   path: "/",
+    // });
+    // res.clearCookie("refresh_token", {
+    //   httpOnly: true,
+    //   secure: true,
+    //   sameSite: "lax",
+    //   path: "/",
+    // });
   
     return res.status(200).json({ message: "Logged out successfully" });
 });
