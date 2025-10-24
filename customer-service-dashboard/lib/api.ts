@@ -1,11 +1,13 @@
-import { fetchWithAuth } from "./fetchWithAuth";
-
 // lib/api.ts
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE;
 const ADMIN_TOKEN = process.env.NEXT_PUBLIC_ADMIN_TOKEN;
 
 type Json = Record<string, any>;
-//改动为了兼容FormData 上传语音和其他的文件 如:图片,视频等
+// lib/api.ts
+import { handleSessionExpired } from "@/lib/handleSessionExpired";
+let isHandlingExpiry = false;
+let refreshInProgress: Promise<boolean> | null = null;
+
 export async function api<T = any>(path: string, init: RequestInit = {}): Promise<T> {
   console.log(`🌐 API调用: ${init.method || 'GET'} ${API_BASE}${path}`);
   const isFormData = typeof FormData !== 'undefined' && init.body instanceof FormData;
@@ -13,16 +15,56 @@ export async function api<T = any>(path: string, init: RequestInit = {}): Promis
   const baseHeaders: HeadersInit = {
     Authorization: `Bearer ${ADMIN_TOKEN}`,
   };
-  if (!isFormData) {
-    baseHeaders["Content-Type"] = "application/json";
-  }
-  const res = await fetchWithAuth(`${API_BASE}${path}`, {
+  if (!isFormData) baseHeaders["Content-Type"] = "application/json";
+
+  const fetchOptions: RequestInit = {
     ...init,
     headers: baseHeaders,
-    // 避免 Next 的缓存干扰
     cache: "no-store",
-    credentials: "include", 
-  });
+    credentials: "include",
+  };
+
+  let res = await fetch(`${API_BASE}${path}`, fetchOptions);
+
+  // 🧩 Handle expired or missing access token (401)
+  if (res.status === 401) {
+    console.warn("⚠️ Access token may be expired. Attempting refresh...");
+
+    // If refresh is already happening, wait for it
+    if (isHandlingExpiry && refreshInProgress) {
+      console.log("⏳ Waiting for ongoing token refresh...");
+      const refreshSuccess = await refreshInProgress;
+      if (refreshSuccess) {
+        console.log("🔁 Refresh completed, retrying request...");
+        res = await fetch(`${API_BASE}${path}`, fetchOptions);
+      } else {
+        console.warn("❌ Refresh failed during concurrent wait.");
+        handleSessionExpired();
+        throw new Error("UNAUTHORIZED");
+      }
+    } else {
+      isHandlingExpiry = true;
+
+      if (!refreshInProgress) {
+        refreshInProgress = attemptTokenRefresh();
+      }
+
+      const refreshSuccess = await refreshInProgress;
+      refreshInProgress = null;
+      isHandlingExpiry = false;
+
+      if (!refreshSuccess) {
+        console.warn("❌ Both tokens expired. Logging out...");
+        handleSessionExpired();
+        throw new Error("UNAUTHORIZED");
+      }
+
+      console.log("🟢 Token refreshed silently. Retrying request...");
+      res = await fetch(`${API_BASE}${path}`, fetchOptions);
+    }
+  }
+
+  // 🧾 Handle all other errors
   if (!res.ok && res.status !== 202) {
     let msg = `${res.status} ${res.statusText}`;
     try {
@@ -32,15 +74,48 @@ export async function api<T = any>(path: string, init: RequestInit = {}): Promis
     console.error(`❌ API错误: ${msg}`);
     throw new Error(msg);
   }
-  // 202/pending 时后端可能无 body；容错处理
-  try { 
-    const result = (await res.json()) as T; 
+
+  // ✅ Safe JSON parsing even when body is empty
+  try {
+    const result = (await res.json()) as T;
     console.log(`✅ API响应: ${init.method || 'GET'} ${path}`, result);
     return result;
-  } catch { 
+  } catch {
     console.log(`⚠️ API响应为空: ${init.method || 'GET'} ${path}`);
-    return {} as T; 
+    return {} as T;
   }
+}
+
+/**
+ * Attempt to refresh the access token using refresh cookie.
+ * Returns true if refresh succeeded, false otherwise.
+ */
+async function attemptTokenRefresh(): Promise<boolean> {
+  try {
+    const res = await fetch(`${API_BASE}/auth/refresh`, {
+      method: "POST",
+      credentials: "include", // send refresh cookie
+    });
+
+    if (!res.ok) {
+      console.error("🔴 Refresh token invalid or expired");
+      return false;
+    }
+
+    console.log("🟢 Token refresh successful");
+    return true;
+  } catch (err) {
+    console.error("Error refreshing token:", err);
+    return false;
+  }
+}
+
+/**
+ * Reset internal refresh handling state (call on logout or login)
+ */
+export function resetApiAuthState() {
+  isHandlingExpiry = false;
+  refreshInProgress = null;
 }
 
 export const WaApi = {
