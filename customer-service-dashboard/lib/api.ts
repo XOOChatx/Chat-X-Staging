@@ -1,3 +1,5 @@
+import { fetchWithAuth } from "./fetchWithAuth";
+
 // lib/api.ts
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE;
 const ADMIN_TOKEN = process.env.NEXT_PUBLIC_ADMIN_TOKEN;
@@ -14,7 +16,7 @@ export async function api<T = any>(path: string, init: RequestInit = {}): Promis
   if (!isFormData) {
     baseHeaders["Content-Type"] = "application/json";
   }
-  const res = await fetch(`${API_BASE}${path}`, {
+  const res = await fetchWithAuth(`${API_BASE}${path}`, {
     ...init,
     headers: baseHeaders,
     // 避免 Next 的缓存干扰
