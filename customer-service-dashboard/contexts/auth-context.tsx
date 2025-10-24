@@ -252,16 +252,44 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }) 
   }
 
+  // useEffect(() => {
+  //   const fetchMe = async () => {
+  //     try {
+  //       const res = await fetchWithAuth(`${API_URL}/auth/me`, { method: "GET" });
+  //       if (!res) throw new Error("UNAUTHORIZED");
+  //       const data = await res.json();
+  //       setUser(data.user);
+  //     } catch (err: any) {
+  //       if (err.message === "UNAUTHORIZED") {
+  //         //setUser(null);
+  //         console.warn("Session expired after refresh, logging out...");
+  //         handleSessionExpired()
+  //       } else {
+  //         console.error("Failed to fetch user:", err);
+  //       }
+  //     } finally {
+  //       setIsLoading(false);
+  //     }
+  //   };
+  
+  //   fetchMe();
+  // }, []);
+
   useEffect(() => {
-    const fetchMe = async () => {
+    const initSession = async () => {
       try {
+        const refreshed = await startTokenAutoRefresh();
+        if (!refreshed) console.warn("⚠️ Auto-refresh failed. Proceeding anyway.");
+  
         const res = await fetchWithAuth(`${API_URL}/auth/me`, { method: "GET" });
-        if (!res) return;
+        if (!res.ok) throw new Error("UNAUTHORIZED");
+  
         const data = await res.json();
         setUser(data.user);
       } catch (err: any) {
         if (err.message === "UNAUTHORIZED") {
-          setUser(null);
+          console.warn("🔴 Session expired after refresh, logging out...");
+          handleSessionExpired();
         } else {
           console.error("Failed to fetch user:", err);
         }
@@ -270,8 +298,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     };
   
-    fetchMe();
-  }, []);
+    initSession();
+  }, []); 
   
   
   const toastDestructive = async (title:string, description:string) => {
@@ -296,7 +324,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (res.ok) {
         setUser(data.user); // user comes from /login response   
         resetAuthState(); // clear flags from previous session
-        startTokenAutoRefresh(15); // refresh before 15 min expiry
+        startTokenAutoRefresh(1); // refresh before 15 min expiry
         return data.user;
       } else {
         toastDestructive("Login Failed" , data.message)
